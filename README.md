@@ -21,7 +21,12 @@ A powerful routine management app that allows users to create, view, and track r
 
 ## Screenshots
 
-Upload screenshots here to showcase the app's UI.
+![WhatsApp Image 2024-12-25 at 12 34 40_3db0e6f7](https://github.com/user-attachments/assets/a2fc132c-a0c9-40c5-b29f-dc5e997ac845)
+![WhatsApp Image 2024-12-25 at 12 34 41_101eb38c](https://github.com/user-attachments/assets/e6a84011-5e28-420c-9be3-04c6f399b0be)
+![WhatsApp Image 2024-12-25 at 12 34 41_3a62f16d](https://github.com/user-attachments/assets/46e244f1-d7e3-44e3-bc8e-c753cc6ceb02)
+![WhatsApp Image 2024-12-25 at 12 34 41_44951cd5](https://github.com/user-attachments/assets/e8587f48-f3fc-41c9-8dfb-74246b555dd2)
+
+
 
 ---
 
