@@ -30,5 +30,5 @@ export const createRoutine = async (routine) => {
 export const updateRoutine = async (id, updates) => {
   const routineDoc = doc(db, 'routines', id);
   await updateDoc(routineDoc, updates);
-  return { id, ...updates }; // Ensure ID is consistent
+  return { id, ...updates }; 
 };

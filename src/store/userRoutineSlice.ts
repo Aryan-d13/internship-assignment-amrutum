@@ -1,96 +1,64 @@
-// Updated userRoutineSlice.ts with Firebase Firestore integration
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import {
-  fetchUserRoutines,
-  createUserRoutineProgress,
-  updateUserRoutineProgress,
-  UserRoutineProgress,
-} from '../services/api';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-interface UserRoutineState {
-  progress: UserRoutineProgress[];
-  loading: boolean;
-  error: string | null;
-}
+type UserRoutine = {
+  userId: string;
+  routineId: string;
+  completedWeeks: number;
+  lastUpdated: string;
+};
+
+type UserRoutineState = {
+  progress: UserRoutine[];
+};
 
 const initialState: UserRoutineState = {
   progress: [],
-  loading: false,
-  error: null,
 };
-
-// Thunks
-export const fetchUserProgress = createAsyncThunk(
-  'userRoutines/fetchUserProgress',
-  async (userId: string) => {
-    const data = await fetchUserRoutines(userId);
-    return data;
-  }
-);
-
-export const startRoutineForUser = createAsyncThunk(
-  'userRoutines/startRoutine',
-  async (progress: UserRoutineProgress, { dispatch }) => {
-    const data = await createUserRoutineProgress(progress);
-    await dispatch(fetchUserProgress(progress.userId));
-    return data;
-  }
-);
-
-export const updateProgressForUser = createAsyncThunk(
-  'userRoutines/updateRoutineProgress',
-  async (
-    {
-      userId,
-      routineId,
-      changes,
-    }: {
-      userId: string;
-      routineId: string;
-      changes: Partial<UserRoutineProgress>;
-    },
-    { dispatch }
-  ) => {
-    const data = await updateUserRoutineProgress(userId, routineId, changes);
-    await dispatch(fetchUserProgress(userId));
-    return data;
-  }
-);
 
 const userRoutineSlice = createSlice({
   name: 'userRoutines',
   initialState,
-  reducers: {},
-  extraReducers: (builder) => {
-    builder
-      .addCase(fetchUserProgress.pending, (state) => {
-        state.loading = true;
-      })
-      .addCase(
-        fetchUserProgress.fulfilled,
-        (state, action: PayloadAction<UserRoutineProgress[]>) => {
-          state.progress = action.payload;
-          state.loading = false;
-        }
-      )
-      .addCase(fetchUserProgress.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.error.message || 'Error fetching user routines';
-      })
-      .addCase(startRoutineForUser.fulfilled, (state, action: PayloadAction<UserRoutineProgress>) => {
+  reducers: {
+    startRoutineForUser: (
+      state,
+      action: PayloadAction<{
+        userId: string;
+        routineId: string;
+        completedWeeks: number;
+        lastUpdated: string;
+      }>
+    ) => {
+      const existingRoutine = state.progress.find(
+        (p) => p.userId === action.payload.userId && p.routineId === action.payload.routineId
+      );
+
+      if (!existingRoutine) {
         state.progress.push(action.payload);
-      })
-      .addCase(updateProgressForUser.fulfilled, (state, action) => {
-        if (!action.payload) return;
-        const updated = action.payload;
-        const index = state.progress.findIndex(
-          (p) => p.userId === updated.userId && p.routineId === updated.routineId
-        );
-        if (index !== -1) {
-          state.progress[index] = updated;
-        }
-      });
+      } else {
+        console.warn('Routine already started:', action.payload.routineId);
+      }
+    },
+    updateProgressForUser: (
+      state,
+      action: PayloadAction<{
+        userId: string;
+        routineId: string;
+        changes: { completedWeeks: number; lastUpdated: string };
+      }>
+    ) => {
+      const routineIndex = state.progress.findIndex(
+        (p) => p.userId === action.payload.userId && p.routineId === action.payload.routineId
+      );
+
+      if (routineIndex !== -1) {
+        state.progress[routineIndex] = {
+          ...state.progress[routineIndex],
+          ...action.payload.changes,
+        };
+      }
+    },
   },
 });
 
+export const { startRoutineForUser, updateProgressForUser } = userRoutineSlice.actions;
 export default userRoutineSlice.reducer;
